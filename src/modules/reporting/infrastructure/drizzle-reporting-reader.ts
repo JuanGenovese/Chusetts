@@ -1,6 +1,9 @@
 import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { DbExecutor } from "@/shared/infrastructure/db/client";
 import {
+  cashEvents,
+  cashMovements,
   cashSessions,
   movements,
   productCategories,
@@ -8,9 +11,20 @@ import {
   saleOrderLines,
   saleOrders,
   stockLevels,
+  stockMovements,
   users,
 } from "@/shared/infrastructure/db/schema";
-import type { ReportMovement, StockReportProduct, TicketLine } from "../domain";
+import type {
+  CashAdminSession,
+  CashAuditEvent,
+  CashLedgerEntry,
+  CashSessionHistoryEntry,
+  DaySalesTotals,
+  ProductStockHistoryRow,
+  ReportMovement,
+  StockReportProduct,
+  TicketLine,
+} from "../domain";
 import type { ReportingReader, ReportingRepositories } from "../application/ports";
 
 const movementColumns = {
@@ -137,6 +151,114 @@ class DrizzleReportingReader implements ReportingReader {
   async hasAnyOpenCashSession(): Promise<boolean> {
     const rows = await this.db.select({ id: cashSessions.id }).from(cashSessions).where(eq(cashSessions.status, "OPEN")).limit(1);
     return rows.length > 0;
+  }
+
+  async listOpenCashSessions(): Promise<CashAdminSession[]> {
+    // Legacy: LEFT JOIN movimientos_caja, SUM(signo * monto) per open session, newest first.
+    return this.db
+      .select({
+        id: cashSessions.id,
+        number: cashSessions.number,
+        openedBy: users.username,
+        businessDate: cashSessions.businessDate,
+        openedAt: cashSessions.openedAt,
+        cashAvailable: sql<number>`coalesce(sum(${cashMovements.sign} * ${cashMovements.amount}), 0)`.mapWith(Number),
+      })
+      .from(cashSessions)
+      .innerJoin(users, eq(users.id, cashSessions.openedBy))
+      .leftJoin(cashMovements, eq(cashMovements.sessionId, cashSessions.id))
+      .where(eq(cashSessions.status, "OPEN"))
+      .groupBy(cashSessions.id, users.username)
+      .orderBy(desc(cashSessions.number));
+  }
+
+  async daySalesTotals(businessDate: string): Promise<DaySalesTotals> {
+    const [row] = await this.db
+      .select({
+        sales: sql<number>`coalesce(sum(${movements.amount}), 0)`.mapWith(Number),
+        tickets: sql<number>`count(distinct ${movements.ticketId})`.mapWith(Number),
+      })
+      .from(movements)
+      .where(and(eq(movements.businessDate, businessDate), eq(movements.kind, "Venta"), eq(movements.voided, false)));
+    return row ?? { sales: 0, tickets: 0 };
+  }
+
+  async listCashLedger(limit: number): Promise<CashLedgerEntry[]> {
+    const actor = alias(users, "actor");
+    return this.db
+      .select({
+        id: cashMovements.id,
+        sessionNumber: cashSessions.number,
+        occurredAt: cashMovements.occurredAt,
+        responsible: users.username,
+        type: cashMovements.type,
+        description: cashMovements.description,
+        reason: cashMovements.reason,
+        amount: cashMovements.amount,
+        sign: cashMovements.sign,
+        balanceAfter: cashMovements.balanceAfter,
+        actor: actor.username,
+      })
+      .from(cashMovements)
+      .innerJoin(cashSessions, eq(cashSessions.id, cashMovements.sessionId))
+      .innerJoin(users, eq(users.id, cashSessions.openedBy))
+      .innerJoin(actor, eq(actor.id, cashMovements.actorId))
+      .orderBy(desc(cashMovements.occurredAt), desc(cashMovements.id))
+      .limit(limit);
+  }
+
+  async listCashSessionHistory(limit: number): Promise<CashSessionHistoryEntry[]> {
+    return this.db
+      .select({
+        id: cashSessions.id,
+        number: cashSessions.number,
+        businessDate: cashSessions.businessDate,
+        openedBy: users.username,
+        status: cashSessions.status,
+        openedAt: cashSessions.openedAt,
+        closedAt: cashSessions.closedAt,
+        difference: cashSessions.difference,
+      })
+      .from(cashSessions)
+      .innerJoin(users, eq(users.id, cashSessions.openedBy))
+      .orderBy(desc(cashSessions.number))
+      .limit(limit);
+  }
+
+  async listCashEvents(limit: number): Promise<CashAuditEvent[]> {
+    return this.db
+      .select({
+        id: cashEvents.id,
+        sessionNumber: cashSessions.number,
+        type: cashEvents.type,
+        actor: users.username,
+        occurredAt: cashEvents.occurredAt,
+        detail: cashEvents.detail,
+      })
+      .from(cashEvents)
+      .innerJoin(cashSessions, eq(cashSessions.id, cashEvents.sessionId))
+      .innerJoin(users, eq(users.id, cashEvents.actorId))
+      .orderBy(desc(cashEvents.occurredAt), desc(cashEvents.id))
+      .limit(limit);
+  }
+
+  async listProductStockHistory(productId: string, limit: number): Promise<ProductStockHistoryRow[]> {
+    return this.db
+      .select({
+        id: stockMovements.id,
+        createdAt: stockMovements.createdAt,
+        type: stockMovements.type,
+        quantityDelta: stockMovements.quantityDelta,
+        stockBefore: stockMovements.stockBefore,
+        stockAfter: stockMovements.stockAfter,
+        reason: stockMovements.reason,
+        actorUsername: users.username,
+      })
+      .from(stockMovements)
+      .innerJoin(users, eq(users.id, stockMovements.actorId))
+      .where(eq(stockMovements.productId, productId))
+      .orderBy(desc(stockMovements.sequence))
+      .limit(limit);
   }
 }
 

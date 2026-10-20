@@ -47,6 +47,8 @@ const randomDay = () => String(1 + Math.floor(Math.random() * 27)).padStart(2, "
 const randomMonth = () => String(1 + Math.floor(Math.random() * 12)).padStart(2, "0");
 const TEST_DATE = `2088-${randomMonth()}-${randomDay()}`;
 const FIXTURE_DATE = `2099-${randomMonth()}-${randomDay()}`;
+/** Its own day, so the "today" totals of the cash overview only see that test's sales. */
+const OVERVIEW_DATE = `2097-${randomMonth()}-${randomDay()}`;
 
 describe.skipIf(!url)("ledger + reporting against Postgres (one transaction across ledger, inventory, cash)", () => {
   const tag = randomUUID().slice(0, 8);
@@ -396,6 +398,49 @@ describe.skipIf(!url)("ledger + reporting against Postgres (one transaction acro
       expect((await reporting.getPeriodSummary({ from: FIXTURE_DATE, to: FIXTURE_DATE })).sales).toBe(1_950_000);
       await ledger.voidTicket({ actor: cashier, ticketId: extra.ticketId, reason: "otra" });
       expect((await reporting.getPeriodSummary({ from: FIXTURE_DATE, to: FIXTURE_DATE })).sales).toBe(1_450_000);
+    } finally {
+      currentDate = TEST_DATE;
+    }
+  });
+  it("the admin cash overview sees open sessions with their cash, today's sales, the ledger, the history and the audit events", async () => {
+    currentDate = OVERVIEW_DATE;
+    try {
+      const cashier = await newUser("cashier");
+      const closer = await newUser("cashier");
+      const openSessionId = await openFor(cashier.id, 100_000);
+      const closedSessionId = await openFor(closer.id, 50_000);
+      const beer = await newProduct("Overview cerveza", { initialStock: 10, salePrice: 500_000 });
+      await ledger.registerSaleTicket({ actor: cashier, lines: [{ productId: beer.id, quantity: 2 }], paymentMethod: "Efectivo" });
+      const voided = await ledger.registerSaleTicket({ actor: cashier, lines: [{ productId: beer.id, quantity: 1 }], paymentMethod: "Efectivo" });
+      await ledger.voidTicket({ actor: cashier, ticketId: voided.ticketId, reason: "error" });
+      await closeCashSession(cashDeps)({ sessionId: closedSessionId, actor: closer.id, countedCash: 40_000 });
+
+      const overview = await reporting.getCashAdminOverview();
+      const [open, closed] = await Promise.all([
+        conn.db.select().from(cashSessions).where(eq(cashSessions.id, openSessionId)),
+        conn.db.select().from(cashSessions).where(eq(cashSessions.id, closedSessionId)),
+      ]);
+      expect(overview.businessDate).toBe(OVERVIEW_DATE);
+      // opening 1000 + cash sale 10000 (the voided one is refunded); the closed session is not listed
+      const mine = overview.openSessions.find((s) => s.id === openSessionId)!;
+      expect(mine).toMatchObject({ number: open[0].number, openedBy: expect.stringContaining(`it-${tag}`), cashAvailable: 1_100_000 });
+      expect(overview.openSessions.some((s) => s.id === closedSessionId)).toBe(false);
+      expect(overview.cashAvailable).toBeGreaterThanOrEqual(1_100_000);
+      // only this test sells on its date: 2 x $5000, the voided ticket is excluded
+      expect(overview.today).toEqual({ sales: 1_000_000, tickets: 1 });
+
+      const sessionLedger = overview.ledger.filter((e) => e.sessionNumber === open[0].number);
+      expect(sessionLedger.map((e) => e.type)).toEqual(["SALE_REFUND", "CASH_SALE", "CASH_SALE", "OPENING"]); // newest first
+      expect(sessionLedger[0]).toMatchObject({ sign: -1, amount: 500_000, responsible: mine.openedBy, actor: mine.openedBy });
+
+      const entry = overview.history.find((h) => h.id === closedSessionId)!;
+      expect(entry).toMatchObject({ number: closed[0].number, status: "CLOSED", difference: -10_000 });
+      expect(entry.closedAt).toBeInstanceOf(Date);
+      expect(overview.history.find((h) => h.id === openSessionId)).toMatchObject({ status: "OPEN", closedAt: null, difference: null });
+
+      const events = overview.events.filter((e) => e.sessionNumber === closed[0].number);
+      expect(events.map((e) => e.type)).toEqual(["CLOSING", "OPENING"]);
+      expect(events[0].detail).toMatchObject({ countedCash: 40_000, difference: -10_000 });
     } finally {
       currentDate = TEST_DATE;
     }

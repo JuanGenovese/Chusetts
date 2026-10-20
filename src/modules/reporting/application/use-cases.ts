@@ -1,5 +1,8 @@
 import { formatTimestamp } from "@/shared/domain/datetime";
 import {
+  CASH_EVENTS_LIMIT,
+  CASH_HISTORY_LIMIT,
+  CASH_LEDGER_LIMIT,
   buildStockReport,
   expensesByCategory,
   monthStartOf,
@@ -8,8 +11,10 @@ import {
   summarizeMovements,
   summarizeTickets,
   type AdminDashboard,
+  type CashAdminOverview,
   type CashierHome,
   type PeriodSummary,
+  type ProductStockHistoryRow,
   type ReportMovement,
   type TicketLine,
   type TicketSummary,
@@ -20,6 +25,8 @@ import type { ReportingReader } from "./ports/repositories";
 /** Legacy dashboard limits: the "Hoy" list shows 12 rows, the "Mes actual" list 20. */
 const RECENT_TODAY = 12;
 const RECENT_MONTH = 20;
+/** Legacy `get_stock_movements(limit=200)`. */
+const PRODUCT_HISTORY_LIMIT = 200;
 
 async function userTickets(reader: ReportingReader, userId: string, businessDate: string): Promise<TicketSummary[]> {
   const tickets = await reader.listUserTickets(userId, businessDate);
@@ -100,6 +107,25 @@ export const reportingUseCases = (deps: ReportingDeps) => {
 
     /** Legacy `get_movimiento_por_id` (by the legacy numeric id). */
     findMovementByNumber: (number: number): Promise<ReportMovement | null> => read((reader) => reader.findMovementByNumber(number)),
+
+    /** Everything the admin cash page ("Administración de caja") shows: open sessions, ledger, history and audit. */
+    getCashAdminOverview: (): Promise<CashAdminOverview> =>
+      read(async (reader) => {
+        const businessDate = deps.clock.businessDate();
+        const [openSessions, today, ledger, history, events] = await Promise.all([
+          reader.listOpenCashSessions(),
+          reader.daySalesTotals(businessDate),
+          reader.listCashLedger(CASH_LEDGER_LIMIT),
+          reader.listCashSessionHistory(CASH_HISTORY_LIMIT),
+          reader.listCashEvents(CASH_EVENTS_LIMIT),
+        ]);
+        const cashAvailable = openSessions.reduce((total, s) => total + s.cashAvailable, 0);
+        return { businessDate, openSessions, cashAvailable, today, ledger, history, events };
+      }),
+
+    /** Legacy `get_stock_movements`: a product's stock audit trail, newest first (default 200 rows). */
+    listProductStockHistory: (input: { productId: string; limit?: number }): Promise<ProductStockHistoryRow[]> =>
+      read((reader) => reader.listProductStockHistory(input.productId, input.limit ?? PRODUCT_HISTORY_LIMIT)),
 
     /** True when any user has an open cash session ("Cerrar caja" quick action). */
     hasAnyOpenCashSession: (): Promise<boolean> => read((reader) => reader.hasAnyOpenCashSession()),

@@ -145,3 +145,16 @@ export interface CashierHome {
   ticketCount: number;
   averageTicket: Cents;
 }
+
+/** One audit row of a product's stock (legacy `movimientos_stock` joined with the actor's username). */
+export interface ProductStockHistoryRow {
+  id: string;
+  createdAt: Date;
+  /** Legacy code (CONSUMO_VENTA, AJUSTE_FISICO, ...): shown as is, like the legacy history. */
+  type: string;
+  quantityDelta: number;
+  stockBefore: number;
+  stockAfter: number;
+  reason: string;
+  actorUsername: string;
+}

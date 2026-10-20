@@ -135,3 +135,32 @@ describe("history + lookups", () => {
     expect(await reporting.hasAnyOpenCashSession()).toBe(true);
   });
 });
+
+describe("getCashAdminOverview", () => {
+  it("sums the cash of the open sessions and takes today's sales from the business date", async () => {
+    t.store.cashAdminOpenSessions.push(
+      { id: "s2", number: 2, openedBy: "cajero", businessDate: "2026-08-30", openedAt: new Date("2026-08-30T12:00:00Z"), cashAvailable: 250_000 },
+      { id: "s1", number: 1, openedBy: "admin", businessDate: "2026-08-30", openedAt: new Date("2026-08-30T11:00:00Z"), cashAvailable: 100_000 },
+    );
+    t.store.daySales["2026-08-30"] = { sales: 900_000, tickets: 3 };
+    t.store.daySales["2026-08-29"] = { sales: 1, tickets: 1 };
+
+    const overview = await reporting.getCashAdminOverview();
+    expect(overview).toMatchObject({
+      businessDate: "2026-08-30",
+      cashAvailable: 350_000,
+      today: { sales: 900_000, tickets: 3 },
+    });
+    expect(overview.openSessions.map((s) => s.number)).toEqual([2, 1]);
+  });
+
+  it("is empty and zeroed when nothing happened yet", async () => {
+    const overview = await reporting.getCashAdminOverview();
+    expect(overview).toMatchObject({ cashAvailable: 0, today: { sales: 0, tickets: 0 }, openSessions: [], ledger: [], history: [], events: [] });
+  });
+
+  it("asks the reader for the legacy list limits (300 ledger rows, 100 sessions, 200 events)", async () => {
+    await reporting.getCashAdminOverview();
+    expect(t.store.calls).toEqual(expect.arrayContaining(["ledger:300", "history:100", "events:200"]));
+  });
+});
