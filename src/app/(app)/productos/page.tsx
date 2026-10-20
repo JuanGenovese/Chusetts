@@ -1,7 +1,29 @@
+import { ProductsScreen } from "@/modules/catalog";
+import { createProductAction } from "@/server/actions/home";
+import {
+  adjustProductStockAction,
+  deactivateProductAction,
+  removeRecipeComponentAction,
+  restoreProductAction,
+  saveRecipeComponentAction,
+  updateProductAction,
+} from "@/server/actions/products";
 import { guardedPage } from "@/server/auth";
-import { PageHeader } from "@/shared/ui";
+import { loadProductsData } from "@/server/queries/products";
 
-// TODO(phase-3): migrate this screen from the legacy app (ui/admin/products.py); only the header is rendered for now.
-export default async function Page() {
-  return guardedPage("edit_products", () => <PageHeader title="Productos e inventario" subtitle="Un catálogo claro para vender, comprar, controlar insumos y definir recetas." />);
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  return guardedPage("edit_products", async () => (
+    <ProductsScreen
+      data={await loadProductsData(await searchParams)}
+      actions={{
+        create: createProductAction,
+        update: updateProductAction,
+        deactivate: deactivateProductAction,
+        restore: restoreProductAction,
+        adjustStock: adjustProductStockAction,
+        saveRecipeComponent: saveRecipeComponentAction,
+        removeRecipeComponent: removeRecipeComponentAction,
+      }}
+    />
+  ));
 }

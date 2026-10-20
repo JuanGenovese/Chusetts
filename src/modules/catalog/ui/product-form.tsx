@@ -3,7 +3,7 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { formatDecimalInput, parseDecimalInput } from "@/shared/domain/format";
 import { Alert, Button, Caption, Checkbox, Field, Form, NumberInput, SegmentedControl, Select, TextInput, useDialogClose, useToast } from "@/shared/ui";
-import type { NewProductFormAction, ProductFormOptions, ProductKind } from "./types";
+import type { NewProductFormAction, NewProductResult, ProductFormOptions, ProductKind } from "./types";
 
 const KINDS: readonly ProductKind[] = ["Producto", "Insumo"];
 /** Legacy `_renderizar_campos_receta_rapida`: two fixed rows, "Insumo 1" and "Insumo 2". */
@@ -22,7 +22,16 @@ const digitsOnly = (text: string) => text.replace(/\D/g, "");
  * dialog. The Producto/Insumo switch lives outside the form, "Insumo 1/2" rows only appear for a Producto and the
  * "Se vende" checkbox only for an Insumo. Categories cannot be created here (caption points to Administración).
  */
-export function ProductForm({ options, action }: { options: ProductFormOptions; action: NewProductFormAction }) {
+export function ProductForm({
+  options,
+  action,
+  onCreated,
+}: {
+  options: ProductFormOptions;
+  action: NewProductFormAction;
+  /** When given, replaces the default confirmation toast (the /productos page opens the new product's detail). */
+  onCreated?: (result: NewProductResult) => void;
+}) {
   const close = useDialogClose();
   const toast = useToast();
   const defaultUnit = options.units[0]?.code ?? "unidad";
@@ -47,9 +56,10 @@ export function ProductForm({ options, action }: { options: ProductFormOptions; 
       const result = await action({ kind, name, price, categoryId, sellable, sku, components });
       if (result.ok) {
         close();
-        // TODO(phase-productos): the legacy then opens the new product's detail page; until /productos exists the
-        // confirmation (toast + success text of the legacy product page) is shown here.
-        toast(result.message ?? "Producto creado correctamente.", "✅");
+        // Legacy `_guardar_nuevo_producto` opens the new product's detail page with a flash message; the home screen
+        // has no detail page, so there it only confirms with a toast.
+        if (onCreated) onCreated(result);
+        else toast(result.message ?? "Producto creado correctamente.", "✅");
       } else {
         setError(result.message ?? "No se pudo crear el producto.");
       }

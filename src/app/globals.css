@@ -1775,3 +1775,11 @@ select {
   color: var(--text-soft);
   font-size: 13px;
 }
+
+/* st.container(border=True): used by the /productos filter card. */
+.bordered-box {
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+}

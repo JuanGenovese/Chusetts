@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { DomainError } from "@/shared/domain/errors";
-import type { NewProductFormInput } from "@/modules/catalog";
+import type { NewProductFormInput, NewProductResult } from "@/modules/catalog";
 import type { QuickEntryInput } from "@/modules/ledger";
 import type { CurrentUser } from "@/shared/application/current-user";
 import type { ActionState } from "@/shared/ui";
@@ -67,7 +67,7 @@ export async function registerQuickEntryAction(input: QuickEntryInput): Promise<
 }
 
 /** "Cargar producto" dialog (legacy `_guardar_nuevo_producto`): product/supply with an optional quick recipe. */
-export async function createProductAction(input: NewProductFormInput): Promise<ActionState> {
+export async function createProductAction(input: NewProductFormInput): Promise<NewProductResult> {
   const parsed = productSchema.safeParse(input);
   if (!parsed.success) return firstIssue(parsed.error);
   const data = parsed.data;
@@ -78,8 +78,9 @@ export async function createProductAction(input: NewProductFormInput): Promise<A
   const recipe = isSupply
     ? []
     : data.components.map((c) => ({ componentId: c.componentId, quantity: Number(c.quantity), unit: c.unit })).filter((c) => c.quantity > 0);
-  return guarded(user, "edit_products", "No se pudo crear: ", async () => {
-    await catalogUseCases().createProduct({
+  let productId: string | undefined;
+  const result = await guarded(user, "edit_products", "No se pudo crear: ", async () => {
+    const created = await catalogUseCases().createProduct({
       name: data.name,
       categoryId: data.categoryId || null,
       isSellable,
@@ -98,8 +99,11 @@ export async function createProductAction(input: NewProductFormInput): Promise<A
       recipe,
       actorId: user.id,
     });
+    productId = created.product.id;
     return "Producto creado correctamente.";
   });
+  // The /productos screen opens the new product's detail page with the id.
+  return result.ok ? { ...result, productId } : result;
 }
 
 /** Admin "Cerrar caja" quick action: is any cash session open? (the UI toasts or navigates). */

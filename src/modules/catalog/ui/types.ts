@@ -24,4 +24,9 @@ export interface NewProductFormInput {
   components: { componentId: string; quantity: string; unit: string }[];
 }
 
-export type NewProductFormAction = (input: NewProductFormInput) => Promise<ActionState>;
+/** `productId` is the created product (set on success); the /productos screen opens its detail page with it. */
+export interface NewProductResult extends ActionState {
+  productId?: string;
+}
+
+export type NewProductFormAction = (input: NewProductFormInput) => Promise<NewProductResult>;
