@@ -1,7 +1,10 @@
+import { MovementsScreen } from "@/modules/reporting";
+import { findMovementAction, voidMovementAction } from "@/server/actions/voids";
 import { guardedPage } from "@/server/auth";
-import { PageHeader } from "@/shared/ui";
+import { loadMovementsData } from "@/server/queries/history";
 
-// TODO(phase-4): migrate this screen from the legacy app (ui/admin/movements.py); only the header is rendered for now.
-export default async function Page() {
-  return guardedPage("view_all_movements", () => <PageHeader title="Historial de movimientos" subtitle="Consulta detallada de todas las transacciones de caja y mercadería." />);
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  return guardedPage("view_all_movements", async () => (
+    <MovementsScreen data={await loadMovementsData(await searchParams)} actions={{ find: findMovementAction, void: voidMovementAction }} />
+  ));
 }

@@ -1768,3 +1768,10 @@ select {
   }
 }
 
+
+/* ------------------------------------------------------------------ soft note */
+.soft-note {
+  --mb: 0px;
+  color: var(--text-soft);
+  font-size: 13px;
+}

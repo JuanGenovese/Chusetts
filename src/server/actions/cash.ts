@@ -28,6 +28,7 @@ const openSchema = z.object({
 });
 
 const movementSchema = z.object({
+  sessionId: z.string({ error: "Seleccione una caja válida." }).uuid("Seleccione una caja válida."),
   type: z.enum(Object.keys(MANUAL_MOVEMENT_SIGNS) as [ManualMovementType, ...ManualMovementType[]], {
     error: "Seleccione un tipo de movimiento válido.",
   }),
@@ -81,7 +82,10 @@ export async function openSessionAction(_prev: CashActionState, formData: FormDa
   });
 }
 
-// TODO(phase-N): used by the admin "Cajas" page (legacy /cierre-de-caja "Movimiento autorizado"), not by Mi turno.
+/**
+ * Admin "Movimiento autorizado" (legacy /cierre-de-caja): the admin picks ANY open session. The use case locks it and
+ * rejects a missing or closed one, so a closed session can never receive a movement.
+ */
 export async function recordMovementAction(_prev: CashActionState, formData: FormData): Promise<CashActionState> {
   const parsed = movementSchema.safeParse(formObject(formData));
   if (!parsed.success) return fail(parsed.error);
@@ -89,16 +93,7 @@ export async function recordMovementAction(_prev: CashActionState, formData: For
   const forbidden = denied(user, "manage_cash_movements");
   if (forbidden) return forbidden;
   return guarded(async () => {
-    const useCases = cashUseCases();
-    // The session is derived server-side from the user, never taken from the form.
-    const session = await useCases.getOpenCashSession(user.id);
-    if (!session) throw new DomainError("NO_OPEN_SESSION", "No hay una caja abierta.");
-    await useCases.recordManualCashMovement({
-      sessionId: session.id,
-      actor: user.id,
-      actorRole: user.role,
-      ...parsed.data,
-    });
+    await cashUseCases().recordManualCashMovement({ actor: user.id, actorRole: user.role, ...parsed.data });
     return "Movimiento de caja registrado y auditado.";
   });
 }

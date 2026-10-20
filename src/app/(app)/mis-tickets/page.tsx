@@ -1,7 +1,12 @@
+import { MyTicketsScreen } from "@/modules/reporting";
+import { voidTicketAction } from "@/server/actions/voids";
 import { guardedPage } from "@/server/auth";
-import { PageHeader } from "@/shared/ui";
+import { loadMyTicketsData } from "@/server/queries/history";
 
-// TODO(phase-4): migrate this screen from the legacy app (ui/cashier/tickets.py); only the header is rendered for now.
-export default async function Page() {
-  return guardedPage("view_own_sales", () => <PageHeader title="Mis tickets" subtitle="Consulta de tickets propios y anulación completa del ticket con motivo." />);
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  return guardedPage("view_own_sales", async () => {
+    const data = await loadMyTicketsData(await searchParams);
+    // Keyed by date: navigating (sidebar link, date change) always starts from the server's state.
+    return <MyTicketsScreen key={data.businessDate} data={data} action={voidTicketAction} />;
+  });
 }

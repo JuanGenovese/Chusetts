@@ -72,6 +72,9 @@ export function reportingDeps(): ReportingDeps {
   return { uow: narrowUnitOfWork(appUnitOfWork(), (r) => r.reporting), clock: runtime().clock };
 }
 
+/** Today's business date (America/Argentina/Buenos_Aires), for pages that default a filter to "today". */
+export const todayBusinessDate = (): string => runtime().clock.businessDate();
+
 export const catalogUseCases = () => buildCatalogUseCases(catalogDeps());
 export const inventoryUseCases = () => buildInventoryUseCases(inventoryDeps());
 export const ledgerUseCases = () => buildLedgerUseCases(ledgerDeps());
