@@ -29,7 +29,7 @@ const rule = (paths, ...patterns) => ["error", { paths: paths.map((name) => ({ n
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "drizzle/**"]),
+  globalIgnores([".next/**", ".next-*/**", "out/**", "build/**", "next-env.d.ts", "drizzle/**", "docs/**"]),
 
   // Everywhere: no deep imports into other modules.
   { files: ["src/**/*.{ts,tsx}"], rules: { "no-restricted-imports": rule([], crossModule) } },
