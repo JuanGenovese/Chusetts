@@ -13,6 +13,8 @@ export interface CashSessionRepository {
   /** `lock: true` must acquire a row lock (SELECT ... FOR UPDATE) so balance + insert are serialized. */
   findById(id: string, options?: { lock?: boolean }): Promise<CashSession | null>;
   findOpenByUser(userId: string): Promise<CashSession | null>;
+  /** Most recent sessions of a user (any status), newest first. */
+  listRecentByUser(userId: string, limit: number): Promise<CashSession[]>;
   /** Must throw CashSessionError("El usuario ya tiene una caja abierta.") if the one-open-per-user invariant is violated. */
   insert(session: CashSession): Promise<void>;
   /** Optimistic update guarded by the previous status. Returns false when no row matched (concurrent change). */
@@ -34,8 +36,8 @@ export interface CashEventRepository {
 }
 
 /**
- * Read-only view over the sales ledger (owned by the future sales module).
- * Phase 1 adapter returns empty data; Phase 4 replaces it with real queries.
+ * Read-only view over the movements ledger (owned by the ledger module). The cash repositories default to an empty
+ * adapter; the composition root plugs in the ledger-backed one.
  */
 export interface SessionLedgerReader {
   /** Non-cash, non-voided totals grouped by payment method and kind. */

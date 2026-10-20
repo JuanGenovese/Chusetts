@@ -10,6 +10,7 @@ import {
   recordCashReversal,
   getCashBalance,
   getCashSessionOverview,
+  listRecentCashSessions,
   openCashSession,
   recordCashSale,
   recordManualCashMovement,
@@ -20,7 +21,7 @@ import { SystemClock, UuidGenerator } from "./system-adapters";
 
 const url = process.env.DATABASE_URL;
 if (!url) {
-  console.warn("[integration] DATABASE_URL is not set: skipping cash integration tests. Copy .env.example to .env.local and run `docker compose up -d && pnpm db:migrate`.");
+  console.warn("[integration] DATABASE_URL is not set: skipping cash integration tests. Copy .env.local.example to .env.local, run `pnpm supabase:start && pnpm db:migrate`.");
 }
 
 describe.skipIf(!url)("cash module against Postgres", () => {
@@ -143,7 +144,7 @@ describe.skipIf(!url)("cash module against Postgres", () => {
       deps.uow.run(async (repos) => {
         const now = new Date();
         await repos.sessions.insert({
-          id, businessDate: "2026-08-30", openedBy: userId, openedAt: now, openingCash: 0, status: "OPEN",
+          id, number: 0, businessDate: "2026-08-30", openedBy: userId, openedAt: now, openingCash: 0, status: "OPEN",
           closedBy: null, closedAt: null, expectedAmounts: null, countedAmounts: null, difference: null,
           openingNotes: "", closingNotes: "", updatedAt: now,
         });
@@ -152,5 +153,15 @@ describe.skipIf(!url)("cash module against Postgres", () => {
     ).rejects.toThrow("boom");
     const rows = await conn.db.select().from(cashSessions).where(eq(cashSessions.id, id));
     expect(rows).toHaveLength(0);
+  });
+
+  it("assigns increasing display numbers and lists recent sessions newest first", async () => {
+    const userId = await newUser();
+    const first = await openCashSession(deps)({ userId, openingCash: 100, notes: "" });
+    await closeCashSession(deps)({ sessionId: first.id, actor: userId, countedCash: 100, notes: "" });
+    const second = await openCashSession(deps)({ userId, openingCash: 200, notes: "" });
+    const list = await listRecentCashSessions(deps)(userId, 20);
+    expect(list.map((s) => s.id)).toEqual([second.id, first.id]);
+    expect(list[0].number).toBeGreaterThan(list[1].number);
   });
 });

@@ -7,6 +7,10 @@ import { expectedFor, requireSession } from "./internal";
 export const getOpenCashSession = (deps: CashDeps) => (userId: string): Promise<CashSession | null> =>
   deps.uow.run((repos) => repos.sessions.findOpenByUser(userId));
 
+/** Recent sessions of a user (any status), newest first: feeds "Mis últimos cierres". */
+export const listRecentCashSessions = (deps: CashDeps) => (userId: string, limit = 20): Promise<CashSession[]> =>
+  deps.uow.run((repos) => repos.sessions.listRecentByUser(userId, limit));
+
 export const getCashBalance = (deps: CashDeps) => (sessionId: string): Promise<Cents> =>
   deps.uow.run((repos) => repos.movements.balance(sessionId));
 
@@ -48,9 +52,8 @@ export const getCashSessionOverview = (deps: CashDeps) => (userId: string): Prom
   });
 
 /**
- * Guard for the future sales module: call BEFORE voiding a ticket (and before any sales/stock write in the same
- * unit of work). Throws CashSessionError if the ticket's session is closed or missing.
- * TODO(phase-4): sales `voidTicket` must call this first.
+ * Guard for the ledger's void flows: called BEFORE voiding a ticket or movement (and before any ledger/stock write in
+ * the same unit of work). Throws CashSessionError if the ticket's session is closed or missing.
  */
 export const assertCashSessionAllowsVoid = (deps: CashDeps) => (sessionId: string): Promise<void> =>
   deps.uow.run(async (repos) => assertVoidAllowed(await requireSession(repos, sessionId)));

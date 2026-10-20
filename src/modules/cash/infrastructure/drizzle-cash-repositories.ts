@@ -1,4 +1,4 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { PG_UNIQUE_VIOLATION, pgErrorInfo } from "@/shared/infrastructure/db/errors";
 import type { DbExecutor } from "@/shared/infrastructure/db/client";
 import { cashEvents, cashMovements, cashSessions } from "@/shared/infrastructure/db/schema";
@@ -38,6 +38,7 @@ function amountsFromRow(
 function toSession(row: SessionRow): CashSession {
   return {
     id: row.id,
+    number: row.number,
     businessDate: row.businessDate,
     openedBy: row.openedBy,
     openedAt: row.openedAt,
@@ -115,6 +116,16 @@ class DrizzleCashSessionRepository implements CashSessionRepository {
       .where(sql`${cashSessions.openedBy} = ${userId} and ${cashSessions.status} = 'OPEN'`)
       .limit(1);
     return row ? toSession(row) : null;
+  }
+
+  async listRecentByUser(userId: string, limit: number) {
+    const rows = await this.db
+      .select()
+      .from(cashSessions)
+      .where(eq(cashSessions.openedBy, userId))
+      .orderBy(desc(cashSessions.number))
+      .limit(limit);
+    return rows.map(toSession);
   }
 
   async insert(session: CashSession) {
@@ -237,8 +248,9 @@ class DrizzleCashEventRepository implements CashEventRepository {
 }
 
 /**
- * Phase 1 stub: the sales ledger does not exist yet, so a session has no sales.
- * TODO(phase-4): query the sales module's tables (non-voided rows, grouped by payment method / kind).
+ * Default reader used when the cash module runs on its own (cash-only tests): a session has no sales.
+ * The application's composition root (`src/server/app-repositories.ts`) replaces it with the ledger-backed reader
+ * (`createSessionLedgerReader` from the ledger module).
  */
 class EmptySessionLedgerReader implements SessionLedgerReader {
   async nonCashTotals() {

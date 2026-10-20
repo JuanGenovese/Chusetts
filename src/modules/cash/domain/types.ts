@@ -18,6 +18,8 @@ export type CashSessionStatus = "OPEN" | "CLOSED";
 
 export interface CashSession {
   id: string;
+  /** Human-friendly sequential number ("Caja #10"). Assigned by persistence; 0 before the first insert. */
+  number: number;
   businessDate: string; // YYYY-MM-DD
   openedBy: string; // user id
   openedAt: Date;

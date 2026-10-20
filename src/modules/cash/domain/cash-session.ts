@@ -18,6 +18,7 @@ export function openSession(input: OpenSessionParams): CashSession {
   if (input.openingCash < 0) throw new CashSessionError("El efectivo inicial no puede ser negativo.");
   return {
     id: input.id,
+    number: 0,
     businessDate: input.businessDate,
     openedBy: input.openedBy,
     openedAt: input.now,

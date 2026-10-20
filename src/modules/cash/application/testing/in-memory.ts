@@ -36,7 +36,15 @@ export class InMemoryCashStore {
         async insert(session) {
           const dup = [...store.sessions.values()].some((s) => s.openedBy === session.openedBy && s.status === "OPEN");
           if (dup) throw new CashSessionError("El usuario ya tiene una caja abierta.");
-          store.sessions.set(session.id, structuredClone(session));
+          store.sessions.set(session.id, { ...structuredClone(session), number: store.sessions.size + 1 });
+        },
+        async listRecentByUser(userId, limit) {
+          return structuredClone(
+            [...store.sessions.values()]
+              .filter((s) => s.openedBy === userId)
+              .sort((a, b) => b.number - a.number)
+              .slice(0, limit),
+          );
         },
         async update(session, expectedStatus) {
           const current = store.sessions.get(session.id);

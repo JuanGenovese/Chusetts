@@ -4,8 +4,7 @@ import type { CashDeps } from "./deps";
 import { recordMovement, requireSession } from "./internal";
 
 /**
- * Hooks called by the future sales/expenses modules INSIDE their own transaction
- * (they must share the unit of work once Phase 4 composes both modules).
+ * Hooks called by the ledger INSIDE its own transaction (the composition root binds them to the surrounding unit of work).
  * Each is idempotent per original movement id via a reference key.
  */
 

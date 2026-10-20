@@ -1,8 +1,14 @@
-import type { CashPageData } from "@/modules/cash";
-import { cashUseCases, currentUserProvider } from "../composition";
+import type { ShiftPageData } from "@/modules/cash";
+import { requireUser } from "../auth";
+import { cashUseCases } from "../composition";
 
-export async function loadCashPageData(): Promise<CashPageData> {
-  const user = await currentUserProvider.getCurrentUser();
-  const overview = await cashUseCases().getCashSessionOverview(user.id);
-  return { user: { displayName: user.displayName, role: user.role }, overview };
+/** Data for "Mi turno": the user's open session (with figures) and their latest sessions. */
+export async function loadShiftPageData(): Promise<ShiftPageData> {
+  const user = await requireUser();
+  const useCases = cashUseCases();
+  const [overview, recentSessions] = await Promise.all([
+    useCases.getCashSessionOverview(user.id),
+    useCases.listRecentCashSessions(user.id, 20),
+  ]);
+  return { overview, recentSessions };
 }

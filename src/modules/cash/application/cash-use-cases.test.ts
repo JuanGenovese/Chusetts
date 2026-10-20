@@ -9,6 +9,7 @@ import {
   getOpenCashSession,
   getSalesSummary,
   isCashSessionLocked,
+  listRecentCashSessions,
   openCashSession,
   assertCashSessionAllowsVoid,
   recordCashExpense,
@@ -263,5 +264,18 @@ describe("getCashSessionOverview", () => {
     expect(overview?.balance).toBe(1_000);
     expect(overview?.expected.cash).toBe(1_000);
     expect(overview?.movements).toHaveLength(1);
+  });
+});
+
+describe("listRecentCashSessions", () => {
+  it("lists the user's sessions newest first with sequential numbers, ignoring other users", async () => {
+    const first = await openFor("c", 1_000);
+    await closeCashSession(t.deps)({ sessionId: first.id, actor: "c", countedCash: 1_000, notes: "" });
+    await openFor("other", 5);
+    const second = await openFor("c", 2_000);
+    const list = await listRecentCashSessions(t.deps)("c", 20);
+    expect(list.map((s) => s.id)).toEqual([second.id, first.id]);
+    expect(list[0].number).toBeGreaterThan(list[1].number);
+    expect(await listRecentCashSessions(t.deps)("c", 1)).toHaveLength(1);
   });
 });
