@@ -8,6 +8,34 @@
       "when": 1792443338424,
       "tag": "0000_uneven_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792454130751,
+      "tag": "0001_aspiring_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792455706945,
+      "tag": "0002_supreme_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792456384591,
+      "tag": "0003_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792501793878,
+      "tag": "0004_users_auth_link",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import {
   check,
   date,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -39,6 +40,8 @@ export const cashSessions = pgTable(
   "cash_sessions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    // Display number ("Caja #10"); identity so it is assigned by the database.
+    number: integer("number").generatedAlwaysAsIdentity().notNull(),
     businessDate: date("business_date", { mode: "string" }).notNull(),
     openedBy: uuid("opened_by").notNull().references(() => users.id),
     openedAt: timestamp("opened_at", { withTimezone: true }).notNull(),

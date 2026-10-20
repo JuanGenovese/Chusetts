@@ -35,3 +35,24 @@ export function centsToPesos(cents: Cents): number {
 export function formatCents(cents: Cents): string {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(centsToPesos(cents));
 }
+
+function groupThousands(pesos: number): string {
+  return Math.abs(pesos).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/** Legacy `money()`: "$ 1.234" (space, dot thousands, no decimals, negatives as "$ -200"). */
+export function formatMoney(cents: Cents): string {
+  const pesos = Math.round(centsToPesos(cents));
+  return `$ ${pesos < 0 ? "-" : ""}${groupThousands(pesos)}`;
+}
+
+/** Legacy `money_compact()`: "$1.234". */
+export function formatMoneyCompact(cents: Cents): string {
+  const pesos = Math.round(centsToPesos(cents));
+  return `$${pesos < 0 ? "-" : ""}${groupThousands(pesos)}`;
+}
+
+/** Value shown in numeric inputs (Spanish decimal comma, two decimals, no thousands): "5000,00". */
+export function formatPesosInput(cents: Cents): string {
+  return (cents / 100).toFixed(2).replace(".", ",");
+}
