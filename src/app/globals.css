@@ -1783,3 +1783,31 @@ select {
   border: 1px solid var(--st-border);
   border-radius: 8px;
 }
+
+/* ------------------------------------------------------- admin: expander + checklist */
+/* st.expander */
+.expander {
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+}
+.expander > summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 25.6px;
+}
+.expander-body {
+  padding: 0 16px 8px;
+}
+/* A download link that looks like a button. */
+.btn-link {
+  text-decoration: none;
+}
+.checklist {
+  margin: 0 0 16px;
+  padding-left: 1.5rem;
+  font-size: 16px;
+  line-height: 25.6px;
+}

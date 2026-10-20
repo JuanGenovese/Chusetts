@@ -4,3 +4,4 @@ export * from "./cash";
 export * from "./catalog";
 export * from "./inventory";
 export * from "./ledger";
+export * from "./administration";

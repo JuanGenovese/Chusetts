@@ -1,7 +1,10 @@
+import { AdministrationScreen } from "@/modules/administration";
+import { createUserAction, resetPasswordAction } from "@/server/actions/admin";
 import { guardedPage } from "@/server/auth";
-import { PageHeader } from "@/shared/ui";
+import { loadAdministrationData } from "@/server/queries/admin";
 
-// TODO(phase-2): migrate this screen from the legacy app (ui/admin/settings.py); only the header is rendered for now.
 export default async function Page() {
-  return guardedPage("admin_access", () => <PageHeader title="Administración" subtitle="Datos maestros, usuarios y configuración general del sistema." />);
+  return guardedPage("admin_access", async () => (
+    <AdministrationScreen data={await loadAdministrationData()} actions={{ createUser: createUserAction, resetPassword: resetPasswordAction }} />
+  ));
 }

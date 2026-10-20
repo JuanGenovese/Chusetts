@@ -36,6 +36,13 @@
       "when": 1792501793878,
       "tag": "0004_users_auth_link",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792524044340,
+      "tag": "0005_password_events",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,16 @@ export interface ProvisioningGateway {
   linkAppUser(appUserId: string, authUserId: string): Promise<void>;
 }
 
+/** Side effects of day-to-day account administration (Supabase Auth admin API), as opposed to the one-off legacy import. */
+export interface AccountGateway {
+  /** Creates a confirmed auth user with a plain-text initial password. Returns its id. */
+  createAuthUserWithPassword(email: string, password: string): Promise<string>;
+  /** Removes an auth user (compensation when the matching `users` row could not be written). */
+  deleteAuthUser(authUserId: string): Promise<void>;
+  /** Replaces the password. The identity provider revokes the user's existing sessions as part of the change. */
+  setAuthUserPassword(authUserId: string, password: string): Promise<void>;
+}
+
 export type ProvisioningOutcomeKind =
   | "would-create-and-link"
   | "would-link-existing"

@@ -11,7 +11,17 @@ import { SupabasePasswordAuthenticator } from "@/shared/infrastructure/auth/supa
 import { createSupabaseServerClient } from "@/shared/infrastructure/auth/supabase-server";
 import { narrowUnitOfWork } from "@/shared/application/unit-of-work";
 import { drizzleUnitOfWork } from "@/shared/infrastructure/db/unit-of-work";
+import { createSupabaseAdminClient } from "@/shared/infrastructure/auth/supabase-admin";
+import { createAccountGateway } from "@/shared/infrastructure/auth/provisioning-gateway";
+import type { AccountGateway } from "@/shared/application/auth/provisioning";
 import { SupabaseCurrentUserProvider } from "@/shared/infrastructure/auth/supabase-current-user";
+import {
+  administrationUseCases as buildAdministrationUseCases,
+  createDataExportReader,
+  createPasswordEventLog,
+  createUserAdminStore,
+  type AdministrationDeps,
+} from "@/modules/administration";
 import {
   SystemClock,
   UuidGenerator,
@@ -75,7 +85,34 @@ export function reportingDeps(): ReportingDeps {
 /** Today's business date (America/Argentina/Buenos_Aires), for pages that default a filter to "today". */
 export const todayBusinessDate = (): string => runtime().clock.businessDate();
 
+/**
+ * Administration (users, password resets, export) is not part of the ledger unit of work: its identity-provider calls
+ * cannot join a Postgres transaction, so the use cases compensate explicitly. The Supabase admin client (secret key) is
+ * created lazily, only when an account is created or a password is reset.
+ */
+function lazyAccountGateway(): AccountGateway {
+  let gateway: AccountGateway | undefined;
+  const get = () => (gateway ??= createAccountGateway(createSupabaseAdminClient()));
+  return {
+    createAuthUserWithPassword: (email, password) => get().createAuthUserWithPassword(email, password),
+    deleteAuthUser: (authUserId) => get().deleteAuthUser(authUserId),
+    setAuthUserPassword: (authUserId, password) => get().setAuthUserPassword(authUserId, password),
+  };
+}
+
+export function administrationDeps(): AdministrationDeps {
+  const db = getDb();
+  return {
+    users: createUserAdminStore(db),
+    events: createPasswordEventLog(db),
+    exports: createDataExportReader(db),
+    accounts: lazyAccountGateway(),
+    clock: runtime().clock,
+  };
+}
+
 export const catalogUseCases = () => buildCatalogUseCases(catalogDeps());
+export const administrationUseCases = () => buildAdministrationUseCases(administrationDeps());
 export const inventoryUseCases = () => buildInventoryUseCases(inventoryDeps());
 export const ledgerUseCases = () => buildLedgerUseCases(ledgerDeps());
 export const reportingUseCases = () => buildReportingUseCases(reportingDeps());

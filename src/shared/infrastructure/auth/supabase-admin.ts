@@ -2,8 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { supabasePublicEnv, supabaseSecretKey } from "./env";
 
 /**
- * Admin client (secret key): bypasses RLS and can manage auth users. ONLY for provisioning scripts and the local
- * dev seed; never import it from request-handling code.
+ * Admin client (secret key): bypasses RLS and can manage auth users. Used by provisioning scripts, the local dev seed
+ * and the admin-only account actions (create user / reset password), wired in `src/server/composition.ts`.
  */
 export function createSupabaseAdminClient() {
   return createClient(supabasePublicEnv().url, supabaseSecretKey(), {
