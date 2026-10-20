@@ -8,18 +8,6 @@ import { EXPORT_HREF, type AdministrationActions, type AdministrationData, type 
 
 const initial: ActionState = { ok: false };
 
-/**
- * Legacy "Checklist operativo" (st.markdown). Adapted lines: the app is now a web app on Supabase, so there is no PC
- * with a Windows password, no local database file in OneDrive and no SQLite backup; the export replaces the backup.
- */
-const CHECKLIST = [
-  "Los dispositivos que usen Chusetts deben tener bloqueo de pantalla con contraseña.",
-  "El cajero debe usar usuario propio.",
-  "No usar el usuario admin para caja diaria.",
-  "No subir las exportaciones de datos a GitHub.",
-  "No guardar las exportaciones en OneDrive / Google Drive sin protegerlas.",
-  "Descargar una exportación de datos al final del día.",
-];
 
 /**
  * One form's submit cycle: runs the action inside a transition (so React does not reset the typed values when the
@@ -152,16 +140,6 @@ export function AdministrationScreen({ data, actions }: { data: AdministrationDa
       <a className="btn btn-primary btn-block btn-link" href={EXPORT_HREF} download>
         Descargar exportación de datos
       </a>
-      <div className="md">
-        <Paragraph>
-          <strong>Checklist operativo</strong>
-        </Paragraph>
-        <ul className="checklist">
-          {CHECKLIST.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-      </div>
     </>
   );
 }
