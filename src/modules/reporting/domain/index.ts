@@ -3,3 +3,4 @@ export * from "./aggregations";
 export * from "./cash-admin";
 export * from "./movements-csv";
 export * from "./movement-filters";
+export * from "./management-export";

@@ -36,7 +36,13 @@ import {
 import { catalogUseCases as buildCatalogUseCases, type CatalogDeps } from "@/modules/catalog";
 import { inventoryUseCases as buildInventoryUseCases, type InventoryDeps } from "@/modules/inventory";
 import { ledgerUseCases as buildLedgerUseCases, type LedgerDeps } from "@/modules/ledger";
-import { reportingUseCases as buildReportingUseCases, type ReportingDeps } from "@/modules/reporting";
+import {
+  createManagementExportReader,
+  encodeWorkbook,
+  managementExportUseCases as buildManagementExportUseCases,
+  reportingUseCases as buildReportingUseCases,
+  type ReportingDeps,
+} from "@/modules/reporting";
 import { buildAppRepositories, type AppRepositories } from "./app-repositories";
 
 export const currentUserProvider: CurrentUserProvider = new SupabaseCurrentUserProvider();
@@ -116,6 +122,12 @@ export const administrationUseCases = () => buildAdministrationUseCases(administ
 export const inventoryUseCases = () => buildInventoryUseCases(inventoryDeps());
 export const ledgerUseCases = () => buildLedgerUseCases(ledgerDeps());
 export const reportingUseCases = () => buildReportingUseCases(reportingDeps());
+
+/** "Exportar gestión a Excel": the file name, the ten sheets and the .xlsx encoder (infrastructure). */
+export async function buildManagementWorkbook(): Promise<{ fileName: string; body: Buffer }> {
+  const { fileName, sheets } = await buildManagementExportUseCases({ reader: createManagementExportReader(getDb()), clock: runtime().clock }).exportManagement();
+  return { fileName, body: await encodeWorkbook(sheets) };
+}
 
 export function cashUseCases() {
   const deps = cashDeps();
