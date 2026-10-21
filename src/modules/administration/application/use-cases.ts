@@ -3,6 +3,7 @@ import { normalizeUsername, validatePassword } from "@/shared/domain/auth/userna
 import {
   PASSWORD_EVENTS_LIMIT,
   RESET_TARGET_MISSING_MESSAGE,
+  assertCanResetPasswordOf,
   assertCanResetPasswords,
   buildDataExport,
   exportFileName,
@@ -49,17 +50,19 @@ export function administrationUseCases(deps: AdministrationDeps) {
     },
 
     /**
-     * Legacy `reset_user_password`, same check order: password rule, active admin, target exists. The credential changes in
+     * Legacy `reset_user_password`, same check order: password rule, active admin, target exists, then the developer-target check. The credential changes in
      * Supabase Auth (which also revokes the target's sessions); the audit event is written only after that succeeded.
      */
     async resetPassword(input: ResetPasswordInput): Promise<{ username: string }> {
       const targetUsername = normalizeUsername(input.targetUsername);
       const actorUsername = normalizeUsername(input.actorUsername);
       validatePassword(input.newPassword);
-      assertCanResetPasswords(await deps.users.findByUsername(actorUsername));
+      const actor = await deps.users.findByUsername(actorUsername);
+      assertCanResetPasswords(actor);
 
       const target = await deps.users.findByUsername(targetUsername);
       if (!target) throw new DomainError("USER_NOT_FOUND", RESET_TARGET_MISSING_MESSAGE);
+      assertCanResetPasswordOf(actor.role, target.role);
       if (!target.authUserId) throw new DomainError("NO_AUTH_ACCOUNT", "El usuario no tiene una cuenta de acceso vinculada.");
 
       await deps.accounts.setAuthUserPassword(target.authUserId, input.newPassword);

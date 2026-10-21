@@ -8,6 +8,10 @@ export interface AdministrationData {
   users: AdminUserRow[];
   /** Newest first, already limited to the legacy 100. */
   events: PasswordEventRow[];
+  /** Viewer holds `export_data`: only then the "Exportar datos" section is shown. */
+  canExportData: boolean;
+  /** Viewer is a developer: only then developer accounts are offered as password-reset targets. */
+  canResetDevelopers: boolean;
 }
 
 export interface AdministrationActions {

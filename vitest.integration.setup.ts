@@ -1,9 +1,7 @@
-import { config } from "dotenv";
 import { isLocalUrl } from "./src/shared/infrastructure/auth/local-guard";
+import { loadEnv } from "./src/shared/infrastructure/env/load-env";
 
-// Same precedence as Next: .env.local first, then .env.
-config({ path: ".env.local" });
-config({ path: ".env" });
+loadEnv();
 
 // Integration tests insert, truncate and delete data: they may only ever run against the LOCAL stack (`supabase start`).
 if (!isLocalUrl(process.env.DATABASE_URL)) {

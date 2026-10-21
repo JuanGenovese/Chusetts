@@ -4,7 +4,7 @@ import type { Cents } from "@/shared/domain/money";
 export const MOVEMENT_KINDS = ["Venta", "Gasto", "Compra", "Ajuste Stock"] as const;
 export type MovementKind = (typeof MOVEMENT_KINDS)[number];
 
-export type ActorRole = "admin" | "cashier";
+export type ActorRole = "admin" | "cashier" | "developer";
 
 /** Who performs an operation. The role drives the legacy permissions (admin vs cajero). */
 export interface Actor {

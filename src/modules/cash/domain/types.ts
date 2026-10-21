@@ -97,4 +97,4 @@ export interface SalesSummary {
   tickets: number;
 }
 
-export type UserRole = "admin" | "cashier";
+export type UserRole = "admin" | "cashier" | "developer";

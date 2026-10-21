@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAGE_PERMISSIONS, ROLE_PERMISSIONS, hasPermission, permissionsFor } from "./permissions";
+import { PAGE_PERMISSIONS, ROLE_PERMISSIONS, hasPermission, isAdminLike, permissionsFor } from "./permissions";
 
 describe("ROLE_PERMISSIONS (legacy auth.ROLE_PERMISSIONS, verbatim)", () => {
   it("gives the admin the legacy admin set", () => {
@@ -24,7 +24,22 @@ describe("ROLE_PERMISSIONS (legacy auth.ROLE_PERMISSIONS, verbatim)", () => {
     expect(hasPermission({ role: "admin" }, "annul_own_sale")).toBe(false);
   });
   it("is exposed as a readonly map", () => {
-    expect(Object.keys(ROLE_PERMISSIONS)).toEqual(["admin", "cashier"]);
+    expect(Object.keys(ROLE_PERMISSIONS)).toEqual(["admin", "cashier", "developer"]);
+  });
+  it("gives the developer every admin permission plus export_data", () => {
+    const admin = [...permissionsFor("admin")];
+    expect([...permissionsFor("developer")].sort()).toEqual([...admin, "export_data"].sort());
+  });
+  it("keeps export_data away from the admin and the cashier", () => {
+    expect(hasPermission({ role: "admin" }, "export_data")).toBe(false);
+    expect(hasPermission({ role: "cashier" }, "export_data")).toBe(false);
+    expect(hasPermission({ role: "developer" }, "export_data")).toBe(true);
+  });
+});
+
+describe("isAdminLike", () => {
+  it("is true for admin and developer, false for cashier", () => {
+    expect([isAdminLike("admin"), isAdminLike("developer"), isAdminLike("cashier")]).toEqual([true, true, false]);
   });
 });
 

@@ -44,7 +44,7 @@ export function requireReason(reason: string, message: string): string {
 
 /** Legacy `ensure_permission('admin_access')` message. */
 export function assertAdmin(actor: Actor): void {
-  if (actor.role !== "admin") throw new LedgerPermissionError("No tenés permisos para acceder a esta función.");
+  if (actor.role === "cashier") throw new LedgerPermissionError("No tenés permisos para acceder a esta función.");
 }
 
 export function isValidBusinessDate(value: string): boolean {

@@ -8,18 +8,6 @@ import { EXPORT_HREF, type AdministrationActions, type AdministrationData, type 
 
 const initial: ActionState = { ok: false };
 
-/**
- * Legacy "Checklist operativo" (st.markdown). Adapted lines: the app is now a web app on Supabase, so there is no PC
- * with a Windows password, no local database file in OneDrive and no SQLite backup; the export replaces the backup.
- */
-const CHECKLIST = [
-  "Los dispositivos que usen Chusetts deben tener bloqueo de pantalla con contraseña.",
-  "El cajero debe usar usuario propio.",
-  "No usar el usuario admin para caja diaria.",
-  "No subir las exportaciones de datos a GitHub.",
-  "No guardar las exportaciones en OneDrive / Google Drive sin protegerlas.",
-  "Descargar una exportación de datos al final del día.",
-];
 
 /**
  * One form's submit cycle: runs the action inside a transition (so React does not reset the typed values when the
@@ -123,6 +111,8 @@ function Expander({ title, children }: { title: string; children: ReactNode }) {
  * the operating checklist. Not ported on purpose: "Base activa" (no local file) and "Servidor local" (hosted app).
  */
 export function AdministrationScreen({ data, actions }: { data: AdministrationData; actions: AdministrationActions }) {
+  // The server refuses it anyway; hiding developer accounts just keeps the select free of options that always fail.
+  const resetTargets = data.canResetDevelopers ? data.users : data.users.filter((u) => u.role !== "developer");
   return (
     <>
       <PageHeader title="Administración" subtitle="Estado técnico, usuarios y recomendaciones operativas." />
@@ -138,7 +128,7 @@ export function AdministrationScreen({ data, actions }: { data: AdministrationDa
 
       <Subheader>Restablecer contraseña</Subheader>
       <Caption>El administrador define una contraseña temporal. La contraseña anterior deja de funcionar inmediatamente.</Caption>
-      {data.users.length > 0 ? <ResetPasswordForm users={data.users} action={actions.resetPassword} /> : null}
+      {resetTargets.length > 0 ? <ResetPasswordForm users={resetTargets} action={actions.resetPassword} /> : null}
 
       <Expander title="Auditoría de cambios de contraseña">
         <SummaryTable
@@ -147,21 +137,15 @@ export function AdministrationScreen({ data, actions }: { data: AdministrationDa
         />
       </Expander>
 
-      <Subheader>Exportar datos</Subheader>
-      <Caption>Descarga un archivo JSON con todos los datos de la aplicación. No incluye contraseñas ni credenciales.</Caption>
-      <a className="btn btn-primary btn-block btn-link" href={EXPORT_HREF} download>
-        Descargar exportación de datos
-      </a>
-      <div className="md">
-        <Paragraph>
-          <strong>Checklist operativo</strong>
-        </Paragraph>
-        <ul className="checklist">
-          {CHECKLIST.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-      </div>
+      {data.canExportData ? (
+        <>
+          <Subheader>Exportar datos</Subheader>
+          <Caption>Descarga un archivo JSON con todos los datos de la aplicación. No incluye contraseñas ni credenciales.</Caption>
+          <a className="btn btn-primary btn-block btn-link" href={EXPORT_HREF} download>
+            Descargar exportación de datos
+          </a>
+        </>
+      ) : null}
     </>
   );
 }

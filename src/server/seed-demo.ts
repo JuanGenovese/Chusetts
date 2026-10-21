@@ -7,15 +7,14 @@
  *
  * Local development only: refuses to run against a non-local DATABASE_URL.
  */
-import { config } from "dotenv";
 import { sql } from "drizzle-orm";
 import { createDbConnection, requireDatabaseUrl } from "@/shared/infrastructure/db/client";
 import { seedReferenceData } from "@/shared/infrastructure/db/seed-reference";
 import { users } from "@/shared/infrastructure/db/schema";
 import { LOCAL_SEED_ADMIN } from "@/shared/infrastructure/db/local-seed-users";
+import { loadEnv } from "@/shared/infrastructure/env/load-env";
 
-config({ path: ".env.local" });
-config({ path: ".env" });
+loadEnv();
 
 const TABLES = [
   "cash_events",

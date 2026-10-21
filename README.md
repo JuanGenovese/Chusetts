@@ -122,7 +122,8 @@ Local accounts (`db:seed:dev`, local only, public passwords): `admin` / `admin-l
 `cajero-local-1234` (cashier). The login screen asks for "Usuario" + "Contraseña" like the legacy app.
 
 Scripts: `dev`, `build`, `lint`, `typecheck`, `test` (unit, no DB), `test:integration` (needs the local stack),
-`db:generate` (create a migration after editing `src/shared/infrastructure/db/schema`), `db:migrate`, `db:seed` (reference
+`db:generate` (create a migration after editing `src/shared/infrastructure/db/schema`), `db:migrate` (local only;
+`pnpm db:migrate --remote` to migrate a remote database on purpose), `db:seed` (reference
 data only), `db:seed:dev` (reference data + local accounts), `db:seed:demo` (demo catalog, tickets, an expense and a
 purchase created through the use cases; idempotent, skips when "Pinta IPA" exists; `pnpm db:seed:demo -- --reset` truncates
 catalog/stock/ledger/cash data - never users or reference data - and rebuilds it; refuses non-local databases),

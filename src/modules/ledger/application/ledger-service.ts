@@ -509,7 +509,7 @@ export function createLedgerService(repos: LedgerRepositories, runtime: LedgerRu
     }
     const rows = await repos.movements.listActiveSalesByTicket(
       input.ticketId,
-      input.actor.role === "admin" ? undefined : input.actor.id,
+      input.actor.role === "cashier" ? input.actor.id : undefined,
     );
     if (rows.length === 0) throw new LedgerError("No se encontró el ticket o ya estaba anulado.");
     const at = runtime.clock.now();

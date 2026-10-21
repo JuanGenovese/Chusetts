@@ -1,6 +1,6 @@
 import { boolean, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("user_role", ["admin", "cashier"]);
+export const userRole = pgEnum("user_role", ["admin", "cashier", "developer"]);
 
 /**
  * Application users: the source of truth for username, display name, role and the active flag.

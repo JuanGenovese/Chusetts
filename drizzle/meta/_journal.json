@@ -47,8 +47,15 @@
     {
       "idx": 6,
       "version": "7",
-      "when": 1792550253237,
-      "tag": "0006_nave_to_mercado_pago",
+      "when": 1792535983669,
+      "tag": "0006_developer_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792551375253,
+      "tag": "0007_nave_to_mercado_pago",
       "breakpoints": true
     }
   ]

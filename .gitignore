@@ -46,3 +46,6 @@ next-env.d.ts
 /docs/ui-reference/shots/
 /docs/ui-reference/compare/
 /.next-*/
+
+# local agent tooling (skill registry)
+/.atl/
