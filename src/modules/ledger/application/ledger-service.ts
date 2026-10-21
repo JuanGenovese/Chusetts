@@ -11,90 +11,21 @@ import {
   requireReason,
   type Actor,
   type LedgerMovement,
-  type MovementKind,
   type SaleOrder,
   type SaleOrderLine,
 } from "../domain";
 import type { LedgerRuntime } from "./deps";
-import type { LedgerPaymentMethod, LedgerRepositories, StockAdjustmentPlanView } from "./ports/repositories";
-
-export interface SaleLineInput {
-  productId: string;
-  quantity: number;
-}
-
-export interface RegisterSaleTicketInput {
-  actor: Actor;
-  lines: SaleLineInput[];
-  /** Payment method display name (case-insensitive), e.g. "Efectivo". */
-  paymentMethod: string;
-  notes?: string;
-}
-
-export interface RegisterSaleTicketResult {
-  ticketId: string;
-  orderId: string;
-  total: Cents;
-  movementIds: string[];
-}
-
-export interface AdminMovementInput {
-  actor: Actor;
-  kind: MovementKind;
-  /** Operating date (YYYY-MM-DD) the movement belongs to; the form's "Fecha". */
-  businessDate: string;
-  /** Movement category (expense / purchase category name, product category for sales). */
-  category: string | null;
-  description: string;
-  productId?: string | null;
-  supplierId?: string | null;
-  quantity: number;
-  unitPrice: Cents;
-  amount: Cents;
-  paymentMethod: string;
-  notes?: string;
-}
-
-export interface AdminMovementResult {
-  movementId: string;
-  /** Only for "Venta". */
-  ticketId: string | null;
-}
-
-export interface RegisterExpenseInput {
-  actor: Actor;
-  businessDate: string;
-  description: string;
-  category: string;
-  amount: Cents;
-  paymentMethod: string;
-}
-
-export interface RegisterPurchaseInput {
-  actor: Actor;
-  businessDate: string;
-  description: string;
-  category: string;
-  productId?: string | null;
-  supplierId?: string | null;
-  quantity: number;
-  unitCost: Cents;
-  paymentMethod: string;
-}
-
-export interface RegisterAdminSaleInput {
-  actor: Actor;
-  businessDate: string;
-  description: string;
-  productId?: string | null;
-  quantity: number;
-  unitPrice: Cents;
-  paymentMethod: string;
-}
-
-export interface StockAdjustmentRecord extends StockAdjustmentPlanView {
-  movementId: string;
-}
+import type { LedgerPaymentMethod, LedgerRepositories } from "./ports/repositories";
+import type {
+  AdminMovementInput,
+  AdminMovementResult,
+  RegisterAdminSaleInput,
+  RegisterExpenseInput,
+  RegisterPurchaseInput,
+  RegisterSaleTicketInput,
+  RegisterSaleTicketResult,
+  StockAdjustmentRecord,
+} from "./types";
 
 /**
  * Transaction-scoped ledger operations (ports `repository/movements.py` + the ledger side of `inventory_service`).
