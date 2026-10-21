@@ -1,9 +1,8 @@
-import { config } from "dotenv";
+import { loadEnv } from "../env/load-env";
 import { createDbConnection, requireDatabaseUrl } from "./client";
 import { seedReferenceData } from "./seed-reference";
 
-config({ path: ".env.local" });
-config({ path: ".env" });
+loadEnv();
 
 /** `pnpm db:seed`: idempotent reference data (units, payment methods, movement categories, default product category). */
 async function main() {

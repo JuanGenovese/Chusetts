@@ -1,9 +1,8 @@
-import { config } from "dotenv";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { loadEnv } from "../env/load-env";
 import { createDbConnection, requireDatabaseUrl } from "./client";
 
-config({ path: ".env.local" });
-config({ path: ".env" });
+loadEnv();
 
 // Migrations prefer the session-mode/direct connection; the app runtime uses DATABASE_URL.
 async function main() {

@@ -1,15 +1,14 @@
-import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { assertLocalEnvironment } from "../auth/local-guard";
 import { createSupabaseAdminClient, listAuthUserIdsByEmail } from "../auth/supabase-admin";
 import { usernameToAuthEmail } from "../../domain/auth/username";
+import { loadEnv } from "../env/load-env";
 import { createDbConnection, requireDatabaseUrl } from "./client";
 import { LOCAL_SEED_USERS } from "./local-seed-users";
 import { seedReferenceData } from "./seed-reference";
 import { users } from "./schema";
 
-config({ path: ".env.local" });
-config({ path: ".env" });
+loadEnv();
 
 /**
  * Local development seed: reference data + the local admin / cajero accounts (app rows AND Supabase Auth users, created
