@@ -111,6 +111,30 @@ describe("resetPassword", () => {
     await cases.resetPassword({ targetUsername: "admin", newPassword: "temporal-1", actorUsername: "admin" });
     expect(store.events[0]).toMatchObject({ username: "admin", performedBy: "admin" });
   });
+
+  it("refuses an admin resetting a developer account, without touching the credential or the audit", async () => {
+    const { store, cases } = setup();
+    const dev = store.addUser({ username: "dev1", role: "developer" });
+    await expect(cases.resetPassword({ ...reset, targetUsername: "dev1" })).rejects.toThrow(
+      "No podés restablecer la contraseña de una cuenta de desarrollador.",
+    );
+    expect(store.authAccounts.get(dev.authUserId!)?.password).toBe("old-password");
+    expect(store.events).toEqual([]);
+  });
+
+  it("lets a developer reset an admin and a cashier", async () => {
+    const { store, cases } = setup();
+    store.addUser({ username: "dev1", role: "developer" });
+    store.addUser({ username: "caja1" });
+    await cases.resetPassword({ ...reset, targetUsername: "admin", actorUsername: "dev1" });
+    await cases.resetPassword({ ...reset, actorUsername: "dev1" });
+    expect(store.events.map((e) => e.username)).toEqual(["admin", "caja1"]);
+  });
+
+  it("checks the target existence before the target role", async () => {
+    const { cases } = setup();
+    await expect(cases.resetPassword({ ...reset, targetUsername: "nadie" })).rejects.toThrow("El usuario seleccionado no existe.");
+  });
 });
 
 describe("listing", () => {

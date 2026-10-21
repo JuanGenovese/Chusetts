@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DomainError } from "@/shared/domain/errors";
-import { assertCanResetPasswords, prepareNewUser, roleLabel } from "./user-rules";
+import { assertCanResetPasswordOf, assertCanResetPasswords, prepareNewUser, roleLabel } from "./user-rules";
 
 const valid = { username: "  Caja1 ", displayName: "  Caja Uno ", role: "cajero", password: "12345678", passwordRepeat: "12345678" };
 
@@ -56,6 +56,10 @@ describe("assertCanResetPasswords (legacy reset_user_password)", () => {
     expect(() => assertCanResetPasswords({ role: "admin", isActive: true })).not.toThrow();
   });
 
+  it("allows an active developer", () => {
+    expect(() => assertCanResetPasswords({ role: "developer", isActive: true })).not.toThrow();
+  });
+
   it.each([
     ["a cashier", { role: "cashier" as const, isActive: true }],
     ["an inactive admin", { role: "admin" as const, isActive: false }],
@@ -65,8 +69,26 @@ describe("assertCanResetPasswords (legacy reset_user_password)", () => {
   });
 });
 
+describe("assertCanResetPasswordOf (no escalation into developer accounts)", () => {
+  it("refuses an admin resetting a developer", () => {
+    expect(errorOf(() => assertCanResetPasswordOf("admin", "developer"))?.message).toBe(
+      "No podés restablecer la contraseña de una cuenta de desarrollador.",
+    );
+  });
+
+  it.each([
+    ["admin", "admin"],
+    ["admin", "cashier"],
+    ["developer", "admin"],
+    ["developer", "cashier"],
+    ["developer", "developer"],
+  ] as const)("allows %s resetting %s", (actor, target) => {
+    expect(() => assertCanResetPasswordOf(actor, target)).not.toThrow();
+  });
+});
+
 describe("roleLabel", () => {
   it("shows the legacy role names", () => {
-    expect([roleLabel("admin"), roleLabel("cashier")]).toEqual(["admin", "cajero"]);
+    expect([roleLabel("admin"), roleLabel("cashier"), roleLabel("developer")]).toEqual(["admin", "cajero", "dev"]);
   });
 });

@@ -111,6 +111,8 @@ function Expander({ title, children }: { title: string; children: ReactNode }) {
  * the operating checklist. Not ported on purpose: "Base activa" (no local file) and "Servidor local" (hosted app).
  */
 export function AdministrationScreen({ data, actions }: { data: AdministrationData; actions: AdministrationActions }) {
+  // The server refuses it anyway; hiding developer accounts just keeps the select free of options that always fail.
+  const resetTargets = data.canResetDevelopers ? data.users : data.users.filter((u) => u.role !== "developer");
   return (
     <>
       <PageHeader title="Administración" subtitle="Estado técnico, usuarios y recomendaciones operativas." />
@@ -126,7 +128,7 @@ export function AdministrationScreen({ data, actions }: { data: AdministrationDa
 
       <Subheader>Restablecer contraseña</Subheader>
       <Caption>El administrador define una contraseña temporal. La contraseña anterior deja de funcionar inmediatamente.</Caption>
-      {data.users.length > 0 ? <ResetPasswordForm users={data.users} action={actions.resetPassword} /> : null}
+      {resetTargets.length > 0 ? <ResetPasswordForm users={resetTargets} action={actions.resetPassword} /> : null}
 
       <Expander title="Auditoría de cambios de contraseña">
         <SummaryTable
@@ -135,11 +137,15 @@ export function AdministrationScreen({ data, actions }: { data: AdministrationDa
         />
       </Expander>
 
-      <Subheader>Exportar datos</Subheader>
-      <Caption>Descarga un archivo JSON con todos los datos de la aplicación. No incluye contraseñas ni credenciales.</Caption>
-      <a className="btn btn-primary btn-block btn-link" href={EXPORT_HREF} download>
-        Descargar exportación de datos
-      </a>
+      {data.canExportData ? (
+        <>
+          <Subheader>Exportar datos</Subheader>
+          <Caption>Descarga un archivo JSON con todos los datos de la aplicación. No incluye contraseñas ni credenciales.</Caption>
+          <a className="btn btn-primary btn-block btn-link" href={EXPORT_HREF} download>
+            Descargar exportación de datos
+          </a>
+        </>
+      ) : null}
     </>
   );
 }

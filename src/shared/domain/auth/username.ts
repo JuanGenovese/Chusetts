@@ -11,7 +11,7 @@ export const MIN_PASSWORD_LENGTH = 8;
 /** Domain of the synthetic e-mails Supabase Auth needs. Never shown to users, never receives mail. */
 export const AUTH_EMAIL_DOMAIN = "users.chusetts.local";
 
-export type AppRole = "admin" | "cashier";
+export type AppRole = "admin" | "cashier" | "developer";
 
 /** Legacy `authenticate`: `username.strip().lower()`. */
 export function normalizeUsername(raw: string): string {

@@ -16,8 +16,8 @@ export default async function Page() {
           </a>
         </div>
         <div>
-          {/* The SQLite backup does not exist on Supabase: the JSON data export (admin only) replaces it. */}
-          {hasPermission(user, "admin_access") ? (
+          {/* The SQLite backup does not exist on Supabase: the JSON data export (developers only) replaces it. */}
+          {hasPermission(user, "export_data") ? (
             <>
               <a className="btn btn-primary btn-block btn-link" href={DATA_EXPORT_HREF} download>
                 Descargar exportación de datos

@@ -2,7 +2,7 @@
  * Navigation map, identical to the legacy Streamlit app (app.py build_pages): same titles, same order,
  * same URL paths. The role's default page lives at "/".
  */
-export type NavRole = "admin" | "cashier";
+export type NavRole = "admin" | "cashier" | "developer";
 
 export interface NavItem {
   title: string;
@@ -27,8 +27,8 @@ const ADMIN_NAV: NavItem[] = [
 ];
 
 export function navItemsFor(role: NavRole): NavItem[] {
-  return role === "admin" ? ADMIN_NAV : CASHIER_NAV;
+  return role === "cashier" ? CASHIER_NAV : ADMIN_NAV;
 }
 
 /** Role label as the legacy sidebar prints it ("Rol: cajero"). */
-export const ROLE_LABELS: Record<NavRole, string> = { admin: "admin", cashier: "cajero" };
+export const ROLE_LABELS: Record<NavRole, string> = { admin: "admin", cashier: "cajero", developer: "dev" };

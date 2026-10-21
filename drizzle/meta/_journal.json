@@ -43,6 +43,13 @@
       "when": 1792524044340,
       "tag": "0005_password_events",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792535983669,
+      "tag": "0006_developer_role",
+      "breakpoints": true
     }
   ]
 }

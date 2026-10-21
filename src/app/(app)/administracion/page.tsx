@@ -4,7 +4,7 @@ import { guardedPage } from "@/server/auth";
 import { loadAdministrationData } from "@/server/queries/admin";
 
 export default async function Page() {
-  return guardedPage("admin_access", async () => (
-    <AdministrationScreen data={await loadAdministrationData()} actions={{ createUser: createUserAction, resetPassword: resetPasswordAction }} />
+  return guardedPage("admin_access", async (user) => (
+    <AdministrationScreen data={await loadAdministrationData(user)} actions={{ createUser: createUserAction, resetPassword: resetPasswordAction }} />
   ));
 }
