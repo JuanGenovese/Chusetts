@@ -53,10 +53,10 @@ describe("mapRole", () => {
 });
 
 describe("mapPaymentMethod", () => {
-  it("maps legacy names to the seeded methods, Mercado Pago becoming Nave", () => {
+  it("maps legacy names to the seeded methods, the legacy Nave becoming Mercado Pago", () => {
     expect(mapPaymentMethod("Efectivo")).toEqual({ code: "EFECTIVO", name: "Efectivo" });
-    expect(mapPaymentMethod("  mercado pago ")).toEqual({ code: "NAVE", name: "Nave" });
-    expect(mapPaymentMethod("Nave")).toEqual({ code: "NAVE", name: "Nave" });
+    expect(mapPaymentMethod("  mercado pago ")).toEqual({ code: "MERCADO_PAGO", name: "Mercado Pago" });
+    expect(mapPaymentMethod("Nave")).toEqual({ code: "MERCADO_PAGO", name: "Mercado Pago" });
     expect(mapPaymentMethod("TARJETA")).toEqual({ code: "TARJETA", name: "Tarjeta" });
     expect(mapPaymentMethod("Transferencia")?.code).toBe("TRANSFERENCIA");
     expect(mapPaymentMethod("Otro")?.code).toBe("OTRO");
@@ -142,7 +142,7 @@ describe("groupTickets", () => {
     ]);
     expect(groups.map((g) => g.ticketId)).toEqual(["A", "B"]);
     expect(groups[0].createdAt).toBe("2026-06-26 10:59:59");
-    expect(groups[0].paymentMethodName).toBe("Nave");
+    expect(groups[0].paymentMethodName).toBe("Mercado Pago");
     expect(groups[1].notes).toBe("nota");
   });
   it("flags tickets that mix payment methods", () => {

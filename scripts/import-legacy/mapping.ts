@@ -49,9 +49,9 @@ const PAYMENT_METHODS: Record<string, PaymentMethodRef> = {
   efectivo: { code: "EFECTIVO", name: "Efectivo" },
   transferencia: { code: "TRANSFERENCIA", name: "Transferencia" },
   tarjeta: { code: "TARJETA", name: "Tarjeta" },
-  nave: { code: "NAVE", name: "Nave" },
-  // The new app replaces "Mercado Pago" with "Nave" (the legacy upgrade does the same rename).
-  "mercado pago": { code: "NAVE", name: "Nave" },
+  "mercado pago": { code: "MERCADO_PAGO", name: "Mercado Pago" },
+  // The legacy upgrade renamed "Mercado Pago" to "Nave"; both map to Mercado Pago.
+  nave: { code: "MERCADO_PAGO", name: "Mercado Pago" },
   otro: { code: "OTRO", name: "Otro" },
 };
 
