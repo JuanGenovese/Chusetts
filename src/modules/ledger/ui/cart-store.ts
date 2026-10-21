@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { addToCart, removeFromCart, type Cart, type CartProduct } from "./cart";
+import { addToCart, decrementInCart, incrementInCart, removeFromCart, type Cart, type CartProduct } from "./cart";
 
 /**
  * The cart lives in a module-level store: like the legacy `st.session_state['cart']` it survives navigation between
@@ -16,6 +16,8 @@ function set(next: Cart) {
 
 export const cartActions = {
   add: (product: CartProduct) => set(addToCart(cart, product)),
+  increment: (productId: string) => set(incrementInCart(cart, productId)),
+  decrement: (productId: string) => set(decrementInCart(cart, productId)),
   remove: (productId: string) => set(removeFromCart(cart, productId)),
   clear: () => set(EMPTY),
 };

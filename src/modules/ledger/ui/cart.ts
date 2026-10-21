@@ -27,6 +27,18 @@ export function addToCart(cart: Cart, product: CartProduct): Cart {
   return [...cart, { productId: product.id, name: product.name, category: product.category, unitPrice: product.price, quantity: 1 }];
 }
 
+function changeQuantity(cart: Cart, productId: string, delta: number): Cart {
+  return cart.map((item) =>
+    item.productId === productId ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item,
+  );
+}
+
+/** "＋": one more unit of a line already in the cart. */
+export const incrementInCart = (cart: Cart, productId: string): Cart => changeQuantity(cart, productId, 1);
+
+/** "−": one unit less, never below 1 (dropping the line is "Quitar"). */
+export const decrementInCart = (cart: Cart, productId: string): Cart => changeQuantity(cart, productId, -1);
+
 /** "Quitar": drops the whole line. */
 export function removeFromCart(cart: Cart, productId: string): Cart {
   return cart.filter((item) => item.productId !== productId);

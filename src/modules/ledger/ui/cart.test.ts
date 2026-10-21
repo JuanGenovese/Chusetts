@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { addToCart, cartTotal, lineSubtotal, removeFromCart, toSaleLines, type CartProduct } from "./cart";
+import {
+  addToCart,
+  cartTotal,
+  decrementInCart,
+  incrementInCart,
+  lineSubtotal,
+  removeFromCart,
+  toSaleLines,
+  type CartProduct,
+} from "./cart";
 
 const beer: CartProduct = { id: "p1", name: "Pinta IPA", category: "Cerveza tirada", price: 450000 };
 const water: CartProduct = { id: "p2", name: "Agua mineral", category: "", price: 180000 };
@@ -24,6 +33,19 @@ describe("cart (legacy services/cart_service.py)", () => {
     const cart = addToCart(addToCart(addToCart([], beer), beer), water);
     expect(removeFromCart(cart, "p1").map((i) => i.productId)).toEqual(["p2"]);
     expect(removeFromCart(cart, "zzz")).toEqual(cart);
+  });
+
+  it("increments a line by one unit (＋)", () => {
+    const cart = addToCart(addToCart([], beer), water);
+    expect(incrementInCart(cart, "p1").map((i) => [i.productId, i.quantity])).toEqual([["p1", 2], ["p2", 1]]);
+    expect(incrementInCart(cart, "zzz")).toEqual(cart);
+  });
+
+  it("decrements a line by one unit (−) but never below 1", () => {
+    const cart = addToCart(addToCart(addToCart([], beer), beer), water);
+    expect(decrementInCart(cart, "p1").map((i) => [i.productId, i.quantity])).toEqual([["p1", 1], ["p2", 1]]);
+    expect(decrementInCart(cart, "p2")).toEqual(cart);
+    expect(decrementInCart(cart, "zzz")).toEqual(cart);
   });
 
   it("computes line subtotal and total in cents", () => {
