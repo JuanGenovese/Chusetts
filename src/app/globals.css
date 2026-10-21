@@ -1722,6 +1722,14 @@ select {
 .btn-primary.btn-remove:hover:not(:disabled) {
   background: #6f000d;
 }
+.btn-qty {
+  min-height: 42px;
+  padding: 0;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 950;
+  line-height: 1;
+}
 .cart-total-box {
   display: flex;
   align-items: center;

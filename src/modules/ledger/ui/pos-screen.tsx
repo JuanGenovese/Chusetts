@@ -53,11 +53,29 @@ function CartLine({ item }: { item: CartItem }) {
         </div>
       </Columns>
       <div className="cart-row-separator md" />
-      {/* Legacy has [−][qty][＋][Quitar]; − and ＋ are hidden by its CSS, their columns keep the layout. */}
       <Columns weights={[0.65, 1.05, 0.65, 1.45]}>
-        <div aria-hidden />
+        <Button
+          block
+          variant="secondary"
+          className="btn-qty"
+          title="Restar una unidad"
+          aria-label="Restar una unidad"
+          disabled={item.quantity <= 1}
+          onClick={() => cartActions.decrement(item.productId)}
+        >
+          −
+        </Button>
         <div className="cart-qty-display md">{formatQuantityLabel(item.quantity)}</div>
-        <div aria-hidden />
+        <Button
+          block
+          variant="secondary"
+          className="btn-qty"
+          title="Sumar una unidad"
+          aria-label="Sumar una unidad"
+          onClick={() => cartActions.increment(item.productId)}
+        >
+          ＋
+        </Button>
         <Button block className="btn-remove" title="Quitar producto" onClick={() => cartActions.remove(item.productId)}>
           Quitar
         </Button>
