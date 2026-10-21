@@ -178,7 +178,7 @@ deploy; it never overwrites rows an admin edited):
 
 - units: `unidad`, `ml`, `oz`, `l`, `g`, `gr`, `kg` (only `unidad/ml/l/g/kg` are usable in stock and recipes, as in the legacy
   `UNIT_DEFINITIONS`; `oz` and `gr` are seeded like the legacy but rejected by `normalizeUnit`).
-- payment methods: Efectivo (10), Transferencia (20), Tarjeta (30), Nave (40, replaces the legacy "Mercado Pago"), Otro (90).
+- payment methods: Efectivo (10), Transferencia (20), Tarjeta (30), Mercado Pago (40; the legacy "Nave" is imported as Mercado Pago), Otro (90).
 - movement categories (legacy `categorias`): 3 Ingreso, 8 Gasto, 4 Compra.
 - the default product category `General`, only while there are no product categories.
 

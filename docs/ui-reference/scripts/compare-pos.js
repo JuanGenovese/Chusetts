@@ -54,7 +54,7 @@ const add = async (page, name, times = 1) => {
     await add(page, "Agua mineral");
     await add(page, "Pinta IPA", vpName === "desktop" ? 2 : 1);
     await full(page, `cajero-pos-carrito-${vpName}`, vp);
-    await page.getByLabel("Medio de pago").selectOption({ label: "Nave" });
+    await page.getByLabel("Medio de pago").selectOption({ label: "Mercado Pago" });
     await page.getByRole("button", { name: "Confirmar venta" }).click();
     await page.getByText(/Venta confirmada\. Ticket:/).waitFor();
     await page.waitForTimeout(500);
