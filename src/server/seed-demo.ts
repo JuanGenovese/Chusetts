@@ -110,10 +110,10 @@ async function main() {
   const today = session.businessDate;
   const monthStart = `${today.slice(0, 8)}01`;
 
-  // Tickets of the day (cash and Nave).
+  // Tickets of the day (cash and Mercado Pago).
   await ledger.registerSaleTicket({ actor, paymentMethod: "Efectivo", lines: [{ productId: ipa.product.id, quantity: 2 }, { productId: water.product.id, quantity: 1 }] });
-  await ledger.registerSaleTicket({ actor, paymentMethod: "Nave", lines: [{ productId: pizza.product.id, quantity: 1 }] });
-  await ledger.registerSaleTicket({ actor, paymentMethod: "Nave", lines: [{ productId: fernetCola.product.id, quantity: 2 }] });
+  await ledger.registerSaleTicket({ actor, paymentMethod: "Mercado Pago", lines: [{ productId: pizza.product.id, quantity: 1 }] });
+  await ledger.registerSaleTicket({ actor, paymentMethod: "Mercado Pago", lines: [{ productId: fernetCola.product.id, quantity: 2 }] });
 
   // Earlier days of the month (administrative sales) so "Ventas por día" has several bars.
   for (const [days, product, qty] of [[-2, ipa, 6], [-5, fernetCola, 4], [-9, pizza, 3]] as const) {
@@ -121,11 +121,11 @@ async function main() {
     if (businessDate === today) continue;
     await ledger.registerAdminSale({
       actor, businessDate, description: product.product.name, productId: product.product.id,
-      quantity: qty, unitPrice: product.product.salePrice, paymentMethod: "Nave",
+      quantity: qty, unitPrice: product.product.salePrice, paymentMethod: "Mercado Pago",
     });
   }
 
-  await ledger.registerExpense({ actor, businessDate: today, description: "Electricidad octubre", category: "Servicios", amount: pesos(25000), paymentMethod: "Nave" });
+  await ledger.registerExpense({ actor, businessDate: today, description: "Electricidad octubre", category: "Servicios", amount: pesos(25000), paymentMethod: "Mercado Pago" });
   await ledger.registerExpense({ actor, businessDate: shiftDate(today, -4, monthStart), description: "Alquiler del local", category: "Alquiler", amount: pesos(120000), paymentMethod: "Transferencia" });
   await ledger.registerPurchase({
     actor, businessDate: today, description: "Barril IPA 30 L", category: "Compra cerveza", productId: barrel,

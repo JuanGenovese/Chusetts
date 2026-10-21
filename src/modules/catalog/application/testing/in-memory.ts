@@ -67,7 +67,7 @@ export class InMemoryCatalogStore {
       ["EFECTIVO", "Efectivo", 10],
       ["TRANSFERENCIA", "Transferencia", 20],
       ["TARJETA", "Tarjeta", 30],
-      ["NAVE", "Nave", 40],
+      ["MERCADO_PAGO", "Mercado Pago", 40],
       ["OTRO", "Otro", 90],
     ];
     for (const [code, name, sequence] of methods) {

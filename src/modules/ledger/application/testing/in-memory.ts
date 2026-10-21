@@ -47,7 +47,7 @@ export class InMemoryLedgerWorld {
   paymentMethods: LedgerPaymentMethod[] = [
     { id: "pm-cash", name: "Efectivo", code: "EFECTIVO" },
     { id: "pm-transfer", name: "Transferencia", code: "TRANSFERENCIA" },
-    { id: "pm-nave", name: "Nave", code: "NAVE" },
+    { id: "pm-mercado-pago", name: "Mercado Pago", code: "MERCADO_PAGO" },
   ];
   movementCategories: { id: string; name: string; kind: MovementKind }[] = [
     { id: "mc-gasto", name: "Servicios", kind: "Gasto" },

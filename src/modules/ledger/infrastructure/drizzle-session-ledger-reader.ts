@@ -18,7 +18,7 @@ export interface SessionSalesTotals {
 
 /**
  * Legacy `calculate_expected` buckets by payment-method NAME: Transferencia / Tarjeta / Mercado Pago, anything else
- * (Nave, Otro, ...) falls into "Otro". The seeded methods are matched by code (the legacy "Mercado Pago" no longer exists).
+ * (Otro, ...) falls into "Otro". The seeded methods are matched by code.
  */
 const CASH_KEY_BY_CODE: Record<string, string> = { TRANSFERENCIA: "transfer", TARJETA: "card", MERCADO_PAGO: "mercado_pago" };
 const KIND_KEY = { Venta: "sale", Gasto: "expense", Compra: "purchase" } as const;

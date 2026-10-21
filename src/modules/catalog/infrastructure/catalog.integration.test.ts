@@ -52,11 +52,11 @@ describe.skipIf(!url)("catalog module against Postgres", () => {
 
   it("serves the seeded reference data in legacy order", async () => {
     expect((await catalog.listUnits()).map((u) => u.code)).toEqual(["unidad", "ml", "oz", "l", "g", "gr", "kg"]);
-    expect((await catalog.listPaymentMethods()).map((m) => m.name)).toEqual(["Efectivo", "Transferencia", "Tarjeta", "Nave", "Otro"]);
-    expect((await catalog.listPaymentMethods()).map((m) => m.name)).not.toContain("Mercado Pago");
+    expect((await catalog.listPaymentMethods()).map((m) => m.name)).toEqual(["Efectivo", "Transferencia", "Tarjeta", "Mercado Pago", "Otro"]);
+    expect((await catalog.listPaymentMethods()).map((m) => m.name)).not.toContain("Nave");
     expect(await catalog.listMovementCategoryNames("Ingreso")).toEqual(["Delivery", "Venta evento", "Venta mostrador"]);
     expect((await catalog.listMovementCategoryNames()).length).toBeGreaterThanOrEqual(15);
-    expect((await catalog.resolveActivePaymentMethod("nave")).code).toBe("NAVE");
+    expect((await catalog.resolveActivePaymentMethod("mercado pago")).code).toBe("MERCADO_PAGO");
   });
 
   it("creates a product with relational category/supplier/unit and a generated SKU", async () => {

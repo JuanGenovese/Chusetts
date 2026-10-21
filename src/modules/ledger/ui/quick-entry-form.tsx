@@ -21,7 +21,7 @@ interface FormState {
 const NO_CATEGORY = "Sin categoría";
 
 function initialState(options: QuickEntryOptions): FormState {
-  const nave = options.paymentMethods.find((m) => m.code === "NAVE") ?? options.paymentMethods[0];
+  const mercadoPago = options.paymentMethods.find((m) => m.code === "MERCADO_PAGO") ?? options.paymentMethods[0];
   return {
     description: "",
     category: options.categories[0] ?? NO_CATEGORY,
@@ -31,7 +31,7 @@ function initialState(options: QuickEntryOptions): FormState {
     quantity: formatDecimalInput(1),
     unitCost: formatDecimalInput(0),
     date: options.businessDate,
-    paymentMethod: nave?.name ?? "",
+    paymentMethod: mercadoPago?.name ?? "",
   };
 }
 

@@ -41,8 +41,8 @@ describe.skipIf(!url)("reference data seed", () => {
   });
 
   it("seeds the legacy codes", async () => {
-    const [nave] = (await conn.db.select().from(paymentMethods)).filter((m) => m.code === "NAVE");
-    expect(nave).toMatchObject({ name: "Nave", sequence: 40, active: true });
+    const [mercadoPago] = (await conn.db.select().from(paymentMethods)).filter((m) => m.code === "MERCADO_PAGO");
+    expect(mercadoPago).toMatchObject({ name: "Mercado Pago", sequence: 40, active: true });
     expect((await conn.db.select().from(units)).map((u) => u.code)).toEqual(expect.arrayContaining(["unidad", "ml", "oz", "l", "g", "gr", "kg"]));
   });
 });

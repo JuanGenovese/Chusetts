@@ -39,7 +39,7 @@ describe("nextOrderState", () => {
 describe("cash helpers", () => {
   it("recognizes the cash payment method by its code", () => {
     expect(isCashPaymentMethod("EFECTIVO")).toBe(true);
-    expect(isCashPaymentMethod("NAVE")).toBe(false);
+    expect(isCashPaymentMethod("MERCADO_PAGO")).toBe(false);
   });
   it("maps ledger kinds to the cash reversal kinds", () => {
     expect(cashReversalKind("Venta")).toBe("sale");

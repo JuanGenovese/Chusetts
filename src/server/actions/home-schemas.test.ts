@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { productSchema, quickEntrySchema } from "./home-schemas";
 
-const expense = { kind: "Gasto", description: "Luz", category: "Servicios", amount: "1234,50", date: "2026-10-19", paymentMethod: "Nave" };
+const expense = { kind: "Gasto", description: "Luz", category: "Servicios", amount: "1234,50", date: "2026-10-19", paymentMethod: "Mercado Pago" };
 const purchase = {
   kind: "Compra", description: "Barril", productId: "p1", supplierId: "", quantity: "2,5", unitCost: "8000,00",
   category: "Compra cerveza", date: "2026-10-19", paymentMethod: "Efectivo",

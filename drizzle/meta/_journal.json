@@ -43,6 +43,13 @@
       "when": 1792524044340,
       "tag": "0005_password_events",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792550253237,
+      "tag": "0006_nave_to_mercado_pago",
+      "breakpoints": true
     }
   ]
 }

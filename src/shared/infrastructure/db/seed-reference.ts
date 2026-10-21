@@ -17,12 +17,12 @@ export const REFERENCE_UNITS = [
   { code: "kg", name: "Kilogramo", magnitude: "peso", baseFactor: 1000 },
 ] as const;
 
-/** Nave replaces the legacy "Mercado Pago" payment method. */
+/** "Mercado Pago" is the digital payment method (the legacy app had renamed it to "Nave"). */
 export const REFERENCE_PAYMENT_METHODS = [
   { code: "EFECTIVO", name: "Efectivo", sequence: 10 },
   { code: "TRANSFERENCIA", name: "Transferencia", sequence: 20 },
   { code: "TARJETA", name: "Tarjeta", sequence: 30 },
-  { code: "NAVE", name: "Nave", sequence: 40 },
+  { code: "MERCADO_PAGO", name: "Mercado Pago", sequence: 40 },
   { code: "OTRO", name: "Otro", sequence: 90 },
 ] as const;
 

@@ -13,7 +13,7 @@ const movement = (overrides: Partial<ReportMovement> = {}): ReportMovement => ({
   quantity: 1,
   unitPrice: 780000,
   amount: 780000,
-  paymentMethod: "Nave",
+  paymentMethod: "Mercado Pago",
   supplier: "",
   notes: "",
   createdByUsername: "admin",
@@ -32,7 +32,7 @@ describe("todayRecord", () => {
       subtitle: "2026-10-19 · Venta",
       fields: [
         { label: "Importe", value: "$ 7.800" },
-        { label: "Medio", value: "Nave" },
+        { label: "Medio", value: "Mercado Pago" },
         { label: "Ticket", value: "20261019-210360" },
       ],
     });
@@ -86,7 +86,7 @@ describe("historyRecord", () => {
       subtitle: "2026-10-19 · Venta · Venta mostrador",
       fields: [
         { label: "Importe", value: "$ 7.800" },
-        { label: "Medio de pago", value: "Nave" },
+        { label: "Medio de pago", value: "Mercado Pago" },
         { label: "Producto", value: "Pizza muzza" },
         { label: "Usuario", value: "admin" },
         { label: "Estado", value: "Confirmado" },

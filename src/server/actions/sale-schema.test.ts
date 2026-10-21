@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { saleSchema } from "./sale-schema";
 
-const valid = { lines: [{ productId: "p1", quantity: 2 }], paymentMethod: "Nave", notes: "  mesa 4 " };
+const valid = { lines: [{ productId: "p1", quantity: 2 }], paymentMethod: "Mercado Pago", notes: "  mesa 4 " };
 
 describe("saleSchema", () => {
   it("accepts a cart and trims the observation", () => {
-    expect(saleSchema.parse(valid)).toEqual({ lines: [{ productId: "p1", quantity: 2 }], paymentMethod: "Nave", notes: "mesa 4" });
+    expect(saleSchema.parse(valid)).toEqual({ lines: [{ productId: "p1", quantity: 2 }], paymentMethod: "Mercado Pago", notes: "mesa 4" });
   });
   it("empty cart -> legacy message", () => {
     const r = saleSchema.safeParse({ ...valid, lines: [] });
@@ -18,6 +18,6 @@ describe("saleSchema", () => {
   });
   it("requires a payment method; notes default to empty", () => {
     expect(saleSchema.safeParse({ ...valid, paymentMethod: " " }).success).toBe(false);
-    expect(saleSchema.parse({ lines: valid.lines, paymentMethod: "Nave" }).notes).toBe("");
+    expect(saleSchema.parse({ lines: valid.lines, paymentMethod: "Mercado Pago" }).notes).toBe("");
   });
 });

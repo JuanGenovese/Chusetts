@@ -83,7 +83,7 @@ export function PosScreen({ data, action }: { data: PosData; action: SaleAction 
 
   const { products, paymentMethods } = data;
   const categories = useMemo(() => ["Todas", ...[...new Set(products.map(categoryOf))].sort()], [products]);
-  const defaultPayment = (paymentMethods.find((m) => m.code === "NAVE") ?? paymentMethods[0])?.name ?? "";
+  const defaultPayment = (paymentMethods.find((m) => m.code === "MERCADO_PAGO") ?? paymentMethods[0])?.name ?? "";
 
   return (
     <>

@@ -18,7 +18,7 @@ describe("seeded reference data (test fixture mirrors the seed)", () => {
   it("exposes the legacy units, payment methods and movement categories", async () => {
     expect((await catalog.listUnits()).map((u) => u.code)).toEqual(["unidad", "ml", "oz", "l", "g", "gr", "kg"]);
     expect((await catalog.listPaymentMethods()).map((m) => m.name)).toEqual([
-      "Efectivo", "Transferencia", "Tarjeta", "Nave", "Otro",
+      "Efectivo", "Transferencia", "Tarjeta", "Mercado Pago", "Otro",
     ]);
     expect(await catalog.listMovementCategoryNames("Compra")).toEqual([
       "Compra bebida", "Compra cerveza", "Compra comida", "Compra insumos",
@@ -378,16 +378,16 @@ describe("suppliers", () => {
 describe("units and payment methods", () => {
   it("lists payment methods by sequence and resolves an active one by name", async () => {
     expect((await catalog.listPaymentMethodRecords()).map((m) => [m.code, m.sequence])).toEqual([
-      ["EFECTIVO", 10], ["TRANSFERENCIA", 20], ["TARJETA", 30], ["NAVE", 40], ["OTRO", 90],
+      ["EFECTIVO", 10], ["TRANSFERENCIA", 20], ["TARJETA", 30], ["MERCADO_PAGO", 40], ["OTRO", 90],
     ]);
-    expect(await catalog.resolveActivePaymentMethod("  nave ")).toMatchObject({ code: "NAVE", name: "Nave" });
-    await expect(catalog.resolveActivePaymentMethod("Mercado Pago")).rejects.toThrow(
+    expect(await catalog.resolveActivePaymentMethod("  mercado pago ")).toMatchObject({ code: "MERCADO_PAGO", name: "Mercado Pago" });
+    await expect(catalog.resolveActivePaymentMethod("Nave")).rejects.toThrow(
       "El medio de pago no existe o está inactivo.",
     );
-    const nave = (await catalog.listPaymentMethods()).find((m) => m.code === "NAVE")!;
-    await catalog.setPaymentMethodActive({ id: nave.id, active: false });
-    expect((await catalog.listPaymentMethods()).map((m) => m.name)).not.toContain("Nave");
-    await expect(catalog.resolveActivePaymentMethod("Nave")).rejects.toThrow("El medio de pago no existe o está inactivo.");
+    const mercadoPago = (await catalog.listPaymentMethods()).find((m) => m.code === "MERCADO_PAGO")!;
+    await catalog.setPaymentMethodActive({ id: mercadoPago.id, active: false });
+    expect((await catalog.listPaymentMethods()).map((m) => m.name)).not.toContain("Mercado Pago");
+    await expect(catalog.resolveActivePaymentMethod("Mercado Pago")).rejects.toThrow("El medio de pago no existe o está inactivo.");
     await expect(catalog.setPaymentMethodActive({ id: "nope", active: true })).rejects.toThrow(
       "No se encontró el registro del catálogo.",
     );
